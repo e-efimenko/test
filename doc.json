@@ -1,0 +1,123 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Document Search API",
+    "description": "Простой поисковик по текстам документов с интеграцией PostgreSQL и Elasticsearch.",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/search": {
+      "get": {
+        "summary": "Поиск документов",
+        "description": "Принимает произвольный текстовый запрос, ищет совпадения в индексе Elasticsearch и возвращает первые 20 документов со всеми полями, упорядоченные по дате создания.",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "required": true,
+            "description": "Текстовый запрос для полнотекстового поиска по документам",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Результаты поиска успешно получены",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Document"
+                  },
+                  "maxItems": 20
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Некорректный запрос"
+          }
+        }
+      }
+    },
+    "/api/documents/{id}": {
+      "delete": {
+        "summary": "Удаление документа",
+        "description": "Удаляет документ из базы данных PostgreSQL и поискового индекса Elasticsearch по его уникальному ID.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Уникальный идентификатор удаляемого документа",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Документ успешно удален",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Запись успешно удалена из базы и индекса"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Документ с указанным ID не найден в базе данных"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Document": {
+        "type": "object",
+        "required": [
+          "id",
+          "rubrics",
+          "text",
+          "created_date"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Уникальный для каждого документа идентификатор"
+          },
+          "rubrics": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Массив рубрик, к которым относится документ"
+          },
+          "text": {
+            "type": "string",
+            "description": "Полный текст документа"
+          },
+          "created_date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Дата и время создания документа"
+          }
+        }
+      }
+    }
+  }
+}
